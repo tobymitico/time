@@ -61,14 +61,8 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	// Set clock identity
-	iface, err := net.InterfaceByName(s.Config.Interface)
-	if err != nil {
-		return fmt.Errorf("unable to get mac address of the interface: %w", err)
-	}
-	s.Config.clockIdentity, err = ptp.NewClockIdentity(iface.HardwareAddr)
-	if err != nil {
-		return fmt.Errorf("unable to get the Clock Identity (EUI-64 address) of the interface: %w", err)
+	if err := s.Config.SetIdentity(); err != nil {
+		return err
 	}
 
 	// initialize the context for the subscriptions

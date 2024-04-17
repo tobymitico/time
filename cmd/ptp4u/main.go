@@ -53,6 +53,7 @@ func main() {
 	flag.IntVar(&c.RecvWorkers, "recvworkers", 10, "Set the number of receive workers")
 	flag.IntVar(&c.SendWorkers, "workers", 100, "Set the number of send workers")
 	flag.UintVar(&c.DomainNumber, "domainnumber", 0, "Set the PTP domain by its number. Valid values are [0-255]")
+	flag.UintVar(&c.ClockID, "clockid", 0, "Set the PTP clock id by its number.")
 	flag.StringVar(&c.ConfigFile, "config", "", "Path to a config with dynamic settings")
 	flag.StringVar(&c.DebugAddr, "pprofaddr", "", "host:port for the pprof to bind")
 	flag.StringVar(&c.Interface, "iface", "eth0", "Set the interface")

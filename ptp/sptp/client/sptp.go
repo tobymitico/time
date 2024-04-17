@@ -103,12 +103,7 @@ func (p *SPTP) initClients() error {
 }
 
 func (p *SPTP) init() error {
-	iface, err := net.InterfaceByName(p.cfg.Iface)
-	if err != nil {
-		return err
-	}
-
-	cid, err := ptp.NewClockIdentity(iface.HardwareAddr)
+	cid, err := p.cfg.SetIdentity()
 	if err != nil {
 		return err
 	}

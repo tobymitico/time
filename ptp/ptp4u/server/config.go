@@ -29,6 +29,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/facebook/time/ptp/protocol"
 	ptp "github.com/facebook/time/ptp/protocol"
 	"golang.org/x/sys/unix"
 	yaml "gopkg.in/yaml.v2"
@@ -56,6 +57,7 @@ type StaticConfig struct {
 	SendWorkers     int
 	TimestampType   string
 	UndrainFileName string
+	ClockID         uint
 }
 
 // DynamicConfig is a set of dynamic options which don't need a server restart
@@ -142,6 +144,25 @@ func (c *Config) IfaceHasIP() (bool, error) {
 // CreatePidFile creates a pid file in a defined location
 func (c *Config) CreatePidFile() error {
 	return os.WriteFile(c.PidFile, []byte(fmt.Sprintf("%d\n", unix.Getpid())), 0644)
+}
+
+func (c *Config) SetIdentity() error {
+	if c.ClockID > 0 {
+		c.clockIdentity = protocol.ClockIdentity(c.ClockID)
+		return nil
+	}
+
+	// Set clock identity
+	iface, err := net.InterfaceByName(c.Interface)
+	if err != nil {
+		return fmt.Errorf("unable to get mac address of the interface: %w", err)
+	}
+	c.clockIdentity, err = ptp.NewClockIdentity(iface.HardwareAddr)
+	if err != nil {
+		return fmt.Errorf("unable to get the Clock Identity (EUI-64 address) of the interface: %w", err)
+	}
+
+	return nil
 }
 
 // DeletePidFile deletes a pid file from a defined location

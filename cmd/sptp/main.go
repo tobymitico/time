@@ -72,6 +72,7 @@ func main() {
 		dscpFlag           int
 		configFlag         string
 		pprofFlag          string
+		cid                uint
 	)
 
 	flag.BoolVar(&verboseFlag, "verbose", false, "verbose output")
@@ -81,6 +82,7 @@ func main() {
 	flag.IntVar(&dscpFlag, "dscp", 0, "DSCP for PTP packets, valid values are between 0-63 (used by send workers)")
 	flag.DurationVar(&intervalFlag, "interval", time.Second, "how often to send DelayReq to each GM")
 	flag.StringVar(&pprofFlag, "pprof", "", "Address to have the profiler listen on, disabled if empty.")
+	flag.UintVar(&cid, "clockid", 0, "clockid")
 
 	flag.Parse()
 
@@ -92,6 +94,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cfg.ClockID = cid
 	if pprofFlag != "" {
 		go func() {
 			err = http.ListenAndServe(pprofFlag, nil)

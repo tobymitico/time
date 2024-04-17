@@ -22,6 +22,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/facebook/time/ptp/protocol"
 	ptp "github.com/facebook/time/ptp/protocol"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
@@ -93,6 +94,7 @@ type Config struct {
 	Backoff                  BackoffConfig
 	SequenceIDMaskBits       uint
 	SequenceIDMaskValue      uint
+	ClockID                  uint
 }
 
 // DefaultConfig returns Config initialized with default values
@@ -250,4 +252,22 @@ func PrepareConfig(cfgPath string, targets []string, iface string, monitoringPor
 	}
 	log.Debugf("config: %+v", cfg)
 	return cfg, nil
+}
+
+func (c *Config) SetIdentity() (protocol.ClockIdentity, error) {
+	if c.ClockID > 0 {
+		return protocol.ClockIdentity(c.ClockID), nil
+	}
+
+	// Set clock identity
+	iface, err := net.InterfaceByName(c.Iface)
+	if err != nil {
+		return 0, fmt.Errorf("unable to get mac address of the interface: %w", err)
+	}
+	clockIdentity, err := ptp.NewClockIdentity(iface.HardwareAddr)
+	if err != nil {
+		return 0, fmt.Errorf("unable to get the Clock Identity (EUI-64 address) of the interface: %w", err)
+	}
+
+	return clockIdentity, err
 }
